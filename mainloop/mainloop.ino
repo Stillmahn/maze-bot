@@ -47,12 +47,9 @@ void setup(void) {
   }
 
   motorl.setSpeed(255);
-  motorl.run(RELEASE);
-  Serial.println("Left motor running");
-
   motorr.setSpeed(255);
-  motorr.run(RELEASE);
-  Serial.println("Right motor running");
+  motorl.run(FORWARD);
+  motorr.run(FORWARD);
 
   // Now we're ready to get readings!
 }
@@ -91,26 +88,42 @@ void loop(void) {
 
   //motor stuff
   uint8_t i;
+  
+  //while the lux of both sensors above limit calibrated to table surface:
+  //move wheels same speed (straight) as robot is on course
+  //if during this course, one of the sensors detects lux drop (color absorbs more light)
+  //slow down the wheel on the same side, to steer back to course
 
-    // Turn on motor
-    motorl.run(FORWARD);
-    motorr.run(FORWARD);
 
-    // Accelerate from zero to maximum speed
-    for (i=0; i<255; i++)
-    {
-       motorl.setSpeed(i); 
-       motorr.setSpeed(i);
-       delay(10);
-    }
 
-   // Decelerate from maximum speed to zero
-    for (i=255; i!=0; i--)
-    {
-       motorl.setSpeed(i); 
-       motorr.setSpeed(i);
-       delay(10);
-    }
+  //PATH FINDING #2 (Awesome one that will allow us to read tags (black tape communicating spin, end, or region))
+  // 1 - Drive forward (state: both sensors see white)
+  //   Until - Sensor sees colour (trail) - Go to 2
+  //   Until - Sensor sees black (tags) - Go to 3
+
+  // 2a - (state: one sensor on path, veered too far to side, need to reallign)
+  //   Lock wheel of sensor (so sensor stays still), move other wheel forward until other sensor on line - Go to 2b
+  //   (state: now very skewed on line, we know how skewed)
+  // 2b - (state: now very skewed on line, we know how skewed)
+  //   Preprogrammed movement to reallign facing along trail. This would be same movement of wheel every time since we were in known messy state
+  //   If came from 1 (no tags), go to 1
+  //   If came from 3 (tags), go to 4
+  // 3 - (state: just saw black of a tag)
+  //   Continue forward (or slight turning, would need to try some things) so sensor finds line quickly. Go to 2 (with var set so goes to 4 after)
+  //   (The point: Reallign so nicely centered on line for reading tags)
+  // 4 - (state: just realligned, maybe on tags, want to read tags)
+  //   Drive back a bit (to make sure behind tags we want to read)
+  //   Drive forward reading tags
+  //   Go to 1 (or do something based on tag)
+
+
+
+
+
+
+  
+
+
     // Now turn off motor
     motorl.run(RELEASE);
     motorr.run(RELEASE);
